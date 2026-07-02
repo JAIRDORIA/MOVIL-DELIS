@@ -13,9 +13,4 @@ class  ApiService {
   static Future<http.Response> put(String url, Map body){
     return http.put(Uri.parse(url),body: body);
   }
-
-  
-
-
-
 }
