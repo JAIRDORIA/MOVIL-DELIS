@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:movil_delis/controllers/dashboard_controller.dart';
 import 'package:movil_delis/screens/clientes/listado_clientes_screen.dart';
 import 'package:movil_delis/presentation/screens/listado_ventas.dart';
 import 'package:movil_delis/core/services/clientes_services.dart';
+import 'package:movil_delis/core/services/ventas_services.dart';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
@@ -13,17 +13,23 @@ class Dashboard extends StatefulWidget {
 
 class _DashboardState extends State<Dashboard> {
   final ClientesService _clientesService = ClientesService();
-
+  final VentasService _ventasService = VentasService();
+  String _totalVentas = '...';
   String _totalClientes = '...';
-  // TODO: cuando compras/ventas tengan su propio service, cargar igual que clientes.
+  
+
   final String _totalCompras = '0';
-  final String _totalVentas = '0';
 
   @override
   void initState() {
     super.initState();
     _cargarTotalClientes();
+    _cargarTotalVentas();
   }
+
+  Future<void> cargarDatos() async {
+  await _cargarTotalClientes();
+}
 
   Future<void> _cargarTotalClientes() async {
     try {
@@ -46,6 +52,33 @@ class _DashboardState extends State<Dashboard> {
     // Al volver del listado (por si crearon/eliminaron clientes), refresca el contador.
     _cargarTotalClientes();
   }
+
+  Future<void> _cargarTotalVentas() async {
+  try {
+    final response = await _ventasService.obtenerVentas(
+      pagina: 1,
+      limite: 1, // solo necesitamos el total
+    );
+
+    setState(() {
+      _totalVentas = response.total.toString();
+    });
+  } catch (e) {
+    setState(() {
+      _totalVentas = '0';
+    });
+  }
+}
+
+Future<void> _irAVentasYActualizar() async {
+  await Navigator.push(
+    context,
+    MaterialPageRoute(builder: (context) => const VentasScreen()),
+  );
+
+  _cargarTotalVentas();
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -117,12 +150,7 @@ class _DashboardState extends State<Dashboard> {
               "Gestiona tus ventas",
               Icons.bar_chart,
               Colors.purple,
-              () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const VentasScreen()),
-                );
-              },
+              _irAVentasYActualizar,
             ),
           ],
         ),
