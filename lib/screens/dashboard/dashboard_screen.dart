@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:movil_delis/controllers/dashboard_controller.dart';
 import 'package:movil_delis/screens/clientes/listado_clientes_screen.dart';
 import 'package:movil_delis/presentation/screens/listado_ventas.dart';
+import 'package:movil_delis/core/services/clientes_services.dart';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
@@ -11,32 +12,39 @@ class Dashboard extends StatefulWidget {
 }
 
 class _DashboardState extends State<Dashboard> {
-  final DashboardController controller = DashboardController();
+  final ClientesService _clientesService = ClientesService();
 
-  int totalClientes = 0;
-  int totalCompras = 0;
-  int totalVentas = 0;
+  String _totalClientes = '...';
+  // TODO: cuando compras/ventas tengan su propio service, cargar igual que clientes.
+  final String _totalCompras = '0';
+  final String _totalVentas = '0';
 
   @override
   void initState() {
     super.initState();
-    cargarDatos();
+    _cargarTotalClientes();
   }
 
-  Future<void> cargarDatos() async {
+  Future<void> _cargarTotalClientes() async {
     try {
-      final clientes = await controller.obtenerClientes();
-      final compras = await controller.obtenerCompras();
-      final ventas = await controller.obtenerVentas();
-
-      setState(() {
-        totalClientes = clientes.length;
-        totalCompras = compras.length;
-        totalVentas = ventas.length;
-      });
-    } catch (e) {
-      debugPrint("Error: $e");
+      // Solo pedimos 1 registro: no necesitamos la lista completa en el
+      // dashboard, solo el campo "total" que ya trae la respuesta paginada.
+      final response = await _clientesService.obtenerClientes(pagina: 1, limite: 1);
+      if (!mounted) return;
+      setState(() => _totalClientes = response.total.toString());
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _totalClientes = '0');
     }
+  }
+
+  Future<void> _irAClientesYActualizar() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const ListadoClientesScreen()),
+    );
+    // Al volver del listado (por si crearon/eliminaron clientes), refresca el contador.
+    _cargarTotalClientes();
   }
 
   @override
@@ -56,83 +64,43 @@ class _DashboardState extends State<Dashboard> {
           children: [
             const Text(
               "¡Bienvenido!",
-              style: TextStyle(
-                fontSize: 30,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
             ),
-
             const SizedBox(height: 8),
-
             const Text(
               "Información general del negocio",
-              style: TextStyle(
-                fontSize: 18,
-                color: Colors.grey,
-              ),
+              style: TextStyle(fontSize: 18, color: Colors.grey),
             ),
-
             const SizedBox(height: 25),
-
             Row(
               children: [
                 Expanded(
-                  child: tarjetaInfo(
-                    "Clientes",
-                    totalClientes.toString(),
-                    Icons.people,
-                    Colors.blue,
-                  ),
+                  child: tarjetaInfo("Clientes", _totalClientes, Icons.people, Colors.blue),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
-                  child: tarjetaInfo(
-                    "Compras",
-                    totalCompras.toString(),
-                    Icons.shopping_cart,
-                    Colors.green,
-                  ),
+                  child: tarjetaInfo("Compras", _totalCompras, Icons.shopping_cart, Colors.green),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
-                  child: tarjetaInfo(
-                    "Ventas",
-                    totalVentas.toString(),
-                    Icons.trending_up,
-                    Colors.purple,
-                  ),
+                  child: tarjetaInfo("Ventas", _totalVentas, Icons.trending_up, Colors.purple),
                 ),
               ],
             ),
-
             const SizedBox(height: 30),
-
             const Text(
               "Módulos",
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),    
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
-
             const SizedBox(height: 15),
-
             moduloCard(
               context,
               "Clientes",
               "Gestiona tus clientes",
               Icons.people,
               Colors.blue,
-              () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => const ListadoClientesScreen(),
-                  ),
-                );
-              },
+              _irAClientesYActualizar,
             ),
-
             moduloCard(
               context,
               "Compras",
@@ -143,7 +111,6 @@ class _DashboardState extends State<Dashboard> {
                 // Navegar a compras
               },
             ),
-
             moduloCard(
               context,
               "Ventas",
@@ -153,11 +120,8 @@ class _DashboardState extends State<Dashboard> {
               () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                    builder: (_) => const VentasScreen(),
-                  ),
+                  MaterialPageRoute(builder: (context) => const VentasScreen()),
                 );
-                // Navegar a ventas
               },
             ),
           ],
@@ -166,12 +130,7 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
-  Widget tarjetaInfo(
-    String titulo,
-    String cantidad,
-    IconData icono,
-    Color color,
-  ) {
+  Widget tarjetaInfo(String titulo, String cantidad, IconData icono, Color color) {
     return Card(
       elevation: 4,
       child: Padding(
@@ -184,20 +143,10 @@ class _DashboardState extends State<Dashboard> {
               color: color,
             ),
             const SizedBox(height: 10),
-            Text(
-              titulo,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 5),
+            Text(titulo, style: const TextStyle(fontWeight: FontWeight.bold)),
             Text(
               cantidad,
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                color: color,
-              ),
+              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: color),
             ),
           ],
         ),

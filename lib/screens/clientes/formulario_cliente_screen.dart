@@ -3,7 +3,6 @@ import '../../controllers/cliente_controller.dart';
 import '../../data/model/clientes.dart';
 
 /// Formulario único para crear y editar clientes.
-/// Si [cliente] es null, se crea uno nuevo; si no, se edita el existente.
 class FormularioClienteScreen extends StatefulWidget {
   final Cliente? cliente;
 
@@ -44,6 +43,7 @@ class _FormularioClienteScreenState extends State<FormularioClienteScreen> {
     _telefonoCtrl.dispose();
     _direccionCtrl.dispose();
     _emailCtrl.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -59,9 +59,7 @@ class _FormularioClienteScreenState extends State<FormularioClienteScreen> {
     final v = value?.trim() ?? '';
     if (v.isEmpty) return 'La identificación es obligatoria';
     final regex = RegExp(r'^[a-zA-Z0-9]{5,15}$');
-    if (!regex.hasMatch(v)) {
-      return 'Debe tener entre 5 y 15 caracteres alfanuméricos';
-    }
+    if (!regex.hasMatch(v)) return 'Debe tener entre 5 y 15 caracteres alfanuméricos';
     return null;
   }
 
@@ -69,9 +67,7 @@ class _FormularioClienteScreenState extends State<FormularioClienteScreen> {
     final v = value?.trim() ?? '';
     if (v.isEmpty) return 'El teléfono es obligatorio';
     final regex = RegExp(r'^[0-9]{7,10}$');
-    if (!regex.hasMatch(v)) {
-      return 'Ingresa un teléfono válido (7 a 10 dígitos, sin espacios)';
-    }
+    if (!regex.hasMatch(v)) return 'Ingresa un teléfono válido (7 a 10 dígitos, sin espacios)';
     return null;
   }
 
@@ -90,13 +86,22 @@ class _FormularioClienteScreenState extends State<FormularioClienteScreen> {
     return null;
   }
 
+  InputDecoration _decoracion(String label, IconData icon) {
+    return InputDecoration(
+      labelText: label,
+      prefixIcon: Icon(icon, color: Colors.grey.shade500),
+      filled: true,
+      fillColor: Colors.grey.shade100,
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+    );
+  }
+
   Future<void> _guardar() async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _guardando = true);
 
-    // El backend exige que la clave "email" siempre venga presente,
-    // aunque en creación puede ir vacía. En edición debe ir con valor.
     final data = {
       'nombre': _nombreCtrl.text.trim(),
       'identificacion': _identificacionCtrl.text.trim(),
@@ -129,7 +134,16 @@ class _FormularioClienteScreenState extends State<FormularioClienteScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(_esEdicion ? 'Editar cliente' : 'Nuevo cliente')),
+      backgroundColor: const Color(0xFFF9FAFB),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0.5,
+        title: Text(
+          _esEdicion ? 'Editar cliente' : 'Nuevo cliente',
+          style: const TextStyle(color: Color(0xFF1B1D2E), fontWeight: FontWeight.bold, fontSize: 20),
+        ),
+        iconTheme: const IconThemeData(color: Color(0xFF1B1D2E)),
+      ),
       body: Form(
         key: _formKey,
         autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -138,49 +152,33 @@ class _FormularioClienteScreenState extends State<FormularioClienteScreen> {
           children: [
             TextFormField(
               controller: _nombreCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Nombre',
-                border: OutlineInputBorder(),
-              ),
+              decoration: _decoracion('Nombre', Icons.person_outline),
               textCapitalization: TextCapitalization.words,
               validator: _validarNombre,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 14),
             TextFormField(
               controller: _identificacionCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Identificación',
-                border: OutlineInputBorder(),
-              ),
-              keyboardType: TextInputType.text,
+              decoration: _decoracion('Identificación', Icons.badge_outlined),
               validator: _validarIdentificacion,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 14),
             TextFormField(
               controller: _telefonoCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Teléfono',
-                border: OutlineInputBorder(),
-              ),
+              decoration: _decoracion('Teléfono', Icons.phone_outlined),
               keyboardType: TextInputType.phone,
               validator: _validarTelefono,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 14),
             TextFormField(
               controller: _direccionCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Dirección',
-                border: OutlineInputBorder(),
-              ),
+              decoration: _decoracion('Dirección', Icons.location_on_outlined),
               validator: _validarDireccion,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 14),
             TextFormField(
               controller: _emailCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Email',
-                border: OutlineInputBorder(),
-              ),
+              decoration: _decoracion('Email', Icons.email_outlined),
               keyboardType: TextInputType.emailAddress,
               validator: _validarEmail,
             ),
@@ -188,16 +186,16 @@ class _FormularioClienteScreenState extends State<FormularioClienteScreen> {
             ElevatedButton(
               onPressed: _guardando ? null : _guardar,
               style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.indigo,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 padding: const EdgeInsets.symmetric(vertical: 14),
               ),
               child: _guardando
                   ? const SizedBox(
                       height: 20,
                       width: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
+                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                     )
                   : Text(_esEdicion ? 'Guardar cambios' : 'Crear cliente'),
             ),

@@ -8,7 +8,7 @@ class DashboardController {
   Future<List<Cliente>> obtenerClientes() async {
     final respuesta = await ApiService.get('/clientes');
 
-    return (respuesta['datos'] as List)
+    return (respuesta['items'] as List)
         .map((e) => Cliente.fromJson(e))
         .toList();
   }
