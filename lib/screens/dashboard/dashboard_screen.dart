@@ -1,8 +1,42 @@
 import 'package:flutter/material.dart';
+import 'package:movil_delis/controllers/dashboard_controller.dart';
 import 'package:movil_delis/screens/clientes/listado_clientes_screen.dart';
 
-class Dashboard extends StatelessWidget {
+class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
+
+  @override
+  State<Dashboard> createState() => _DashboardState();
+}
+
+class _DashboardState extends State<Dashboard> {
+  final DashboardController controller = DashboardController();
+
+  int totalClientes = 0;
+  int totalCompras = 0;
+  int totalVentas = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    cargarDatos();
+  }
+
+  Future<void> cargarDatos() async {
+    try {
+      final clientes = await controller.obtenerClientes();
+      final compras = await controller.obtenerCompras();
+      final ventas = await controller.obtenerVentas();
+
+      setState(() {
+        totalClientes = clientes.length;
+        totalCompras = compras.length;
+        totalVentas = ventas.length;
+      });
+    } catch (e) {
+      debugPrint("Error: $e");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -14,12 +48,11 @@ class Dashboard extends StatelessWidget {
         title: const Text("Dashboard Delis"),
         centerTitle: true,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      body: RefreshIndicator(
+        onRefresh: cargarDatos,
+        child: ListView(
+          padding: const EdgeInsets.all(16),
           children: [
-
             const Text(
               "¡Bienvenido!",
               style: TextStyle(
@@ -45,7 +78,7 @@ class Dashboard extends StatelessWidget {
                 Expanded(
                   child: tarjetaInfo(
                     "Clientes",
-                    "0",
+                    totalClientes.toString(),
                     Icons.people,
                     Colors.blue,
                   ),
@@ -54,7 +87,7 @@ class Dashboard extends StatelessWidget {
                 Expanded(
                   child: tarjetaInfo(
                     "Compras",
-                    "0",
+                    totalCompras.toString(),
                     Icons.shopping_cart,
                     Colors.green,
                   ),
@@ -63,7 +96,7 @@ class Dashboard extends StatelessWidget {
                 Expanded(
                   child: tarjetaInfo(
                     "Ventas",
-                    "0",
+                    totalVentas.toString(),
                     Icons.trending_up,
                     Colors.purple,
                   ),
@@ -78,7 +111,7 @@ class Dashboard extends StatelessWidget {
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-              ),
+              ),    
             ),
 
             const SizedBox(height: 15),
@@ -93,7 +126,7 @@ class Dashboard extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const ListadoClientesScreen(),
+                    builder: (_) => const ListadoClientesScreen(),
                   ),
                 );
               },
@@ -106,7 +139,7 @@ class Dashboard extends StatelessWidget {
               Icons.shopping_cart,
               Colors.green,
               () {
-                // Navegar a compras
+              
               },
             ),
 
@@ -117,7 +150,7 @@ class Dashboard extends StatelessWidget {
               Icons.bar_chart,
               Colors.purple,
               () {
-                // Navegar a ventas
+                // TODO: Navegar a Ventas
               },
             ),
           ],
@@ -127,18 +160,22 @@ class Dashboard extends StatelessWidget {
   }
 
   Widget tarjetaInfo(
-      String titulo,
-      String cantidad,
-      IconData icono,
-      Color color,
-      ) {
+    String titulo,
+    String cantidad,
+    IconData icono,
+    Color color,
+  ) {
     return Card(
       elevation: 4,
       child: Padding(
-        padding: const EdgeInsets.all(15),
+        padding: const EdgeInsets.symmetric(vertical: 20),
         child: Column(
           children: [
-            Icon(icono, size: 40, color: color),
+            Icon(
+              icono,
+              size: 40,
+              color: color,
+            ),
             const SizedBox(height: 10),
             Text(
               titulo,
@@ -146,6 +183,7 @@ class Dashboard extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
+            const SizedBox(height: 5),
             Text(
               cantidad,
               style: TextStyle(
@@ -169,15 +207,23 @@ class Dashboard extends StatelessWidget {
     VoidCallback onTap,
   ) {
     return Card(
+      elevation: 3,
       margin: const EdgeInsets.only(bottom: 15),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: color.withOpacity(0.2),
-          child: Icon(icono, color: color),
+          radius: 24,
+          backgroundColor: color.withOpacity(0.15),
+          child: Icon(
+            icono,
+            color: color,
+          ),
         ),
-        title: Text(titulo),
+        title: Text(
+          titulo,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
         subtitle: Text(subtitulo),
-        trailing: const Icon(Icons.arrow_forward_ios),
+        trailing: const Icon(Icons.arrow_forward_ios, size: 18),
         onTap: onTap,
       ),
     );
