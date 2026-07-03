@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'routes/app_routes.dart';
+import 'package:movil_delis/screens/dashboard/dashboard_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -10,10 +11,10 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       debugShowCheckedModeBanner: false,
-      initialRoute: AppRoutes.home,
-      routes: AppRoutes.routes,
+      title: 'Movil Delis',
+      home: Dashboard(),
     );
   }
 }
