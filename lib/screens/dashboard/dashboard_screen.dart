@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:movil_delis/screens/clientes/listado_clientes_screen.dart';
 import 'package:movil_delis/presentation/screens/listado_ventas.dart';
 import 'package:movil_delis/core/services/clientes_services.dart';
+import 'package:movil_delis/core/services/ventas_services.dart';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
@@ -12,17 +13,23 @@ class Dashboard extends StatefulWidget {
 
 class _DashboardState extends State<Dashboard> {
   final ClientesService _clientesService = ClientesService();
-
+  final VentasService _ventasService = VentasService();
+  String _totalVentas = '...';
   String _totalClientes = '...';
-  // TODO: cuando compras/ventas tengan su propio service, cargar igual que clientes.
+  
+
   final String _totalCompras = '0';
-  final String _totalVentas = '0';
 
   @override
   void initState() {
     super.initState();
     _cargarTotalClientes();
+    _cargarTotalVentas();
   }
+
+  Future<void> cargarDatos() async {
+  await _cargarTotalClientes();
+}
 
   Future<void> _cargarTotalClientes() async {
     try {
@@ -46,6 +53,33 @@ class _DashboardState extends State<Dashboard> {
     _cargarTotalClientes();
   }
 
+  Future<void> _cargarTotalVentas() async {
+  try {
+    final response = await _ventasService.obtenerVentas(
+      pagina: 1,
+      limite: 1, // solo necesitamos el total
+    );
+
+    setState(() {
+      _totalVentas = response.total.toString();
+    });
+  } catch (e) {
+    setState(() {
+      _totalVentas = '0';
+    });
+  }
+}
+
+Future<void> _irAVentasYActualizar() async {
+  await Navigator.push(
+    context,
+    MaterialPageRoute(builder: (context) => const VentasScreen()),
+  );
+
+  _cargarTotalVentas();
+}
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -56,10 +90,10 @@ class _DashboardState extends State<Dashboard> {
         title: const Text("Dashboard Delis"),
         centerTitle: true,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      body: RefreshIndicator(
+        onRefresh: cargarDatos,
+        child: ListView(
+          padding: const EdgeInsets.all(16),
           children: [
             const Text(
               "¡Bienvenido!",
@@ -116,12 +150,7 @@ class _DashboardState extends State<Dashboard> {
               "Gestiona tus ventas",
               Icons.bar_chart,
               Colors.purple,
-              () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const VentasScreen()),
-                );
-              },
+              _irAVentasYActualizar,
             ),
           ],
         ),
@@ -133,10 +162,14 @@ class _DashboardState extends State<Dashboard> {
     return Card(
       elevation: 4,
       child: Padding(
-        padding: const EdgeInsets.all(15),
+        padding: const EdgeInsets.symmetric(vertical: 20),
         child: Column(
           children: [
-            Icon(icono, size: 40, color: color),
+            Icon(
+              icono,
+              size: 40,
+              color: color,
+            ),
             const SizedBox(height: 10),
             Text(titulo, style: const TextStyle(fontWeight: FontWeight.bold)),
             Text(
@@ -158,15 +191,23 @@ class _DashboardState extends State<Dashboard> {
     VoidCallback onTap,
   ) {
     return Card(
+      elevation: 3,
       margin: const EdgeInsets.only(bottom: 15),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: color.withOpacity(0.2),
-          child: Icon(icono, color: color),
+          radius: 24,
+          backgroundColor: color.withOpacity(0.15),
+          child: Icon(
+            icono,
+            color: color,
+          ),
         ),
-        title: Text(titulo),
+        title: Text(
+          titulo,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
         subtitle: Text(subtitulo),
-        trailing: const Icon(Icons.arrow_forward_ios),
+        trailing: const Icon(Icons.arrow_forward_ios, size: 18),
         onTap: onTap,
       ),
     );

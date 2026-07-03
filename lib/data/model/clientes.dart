@@ -60,42 +60,38 @@ class Cliente {
   /// entrada distinto a como nombra las de salida.
   Map<String, dynamic> toJson() {
     return {
+      'id': id,
       'nombre': nombre,
       'identificacion': identificacion,
       'telefono': telefono,
       'direccion': direccion,
       'email': email,
+      'activo': activo,
     };
   }
 }
 
-/// Respuesta paginada: {"items": [...], "total": N, "page": N, "per_page": N}
 class ClientesResponse {
   final List<Cliente> clientes;
   final int total;
   final int pagina;
-  final int porPagina;
   final int totalPaginas;
 
   ClientesResponse({
     required this.clientes,
     required this.total,
     required this.pagina,
-    required this.porPagina,
     required this.totalPaginas,
   });
 
   factory ClientesResponse.fromJson(Map<String, dynamic> json) {
-    final items = json['items'] as List<dynamic>? ?? [];
-    final total = json['total'] ?? 0;
-    final porPagina = json['per_page'] ?? 10;
-    final totalPaginas = porPagina > 0 ? (total / porPagina).ceil() : 1;
     return ClientesResponse(
-      clientes: items.map((item) => Cliente.fromJson(item)).toList(),
-      total: total,
+      clientes: (json['items'] as List)
+          .map((e) => Cliente.fromJson(e))
+          .toList(),
+      total: json['total'] ?? 0,
       pagina: json['page'] ?? 1,
-      porPagina: porPagina,
-      totalPaginas: totalPaginas == 0 ? 1 : totalPaginas,
+      totalPaginas: ((json['total'] ?? 0) / (json['per_page'] ?? 20)).ceil(),
     );
   }
 }
