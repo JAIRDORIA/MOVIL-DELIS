@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:movil_delis/screens/clientes/listado_clientes_screen.dart';
+import 'package:movil_delis/presentation/screens/listado_ventas.dart';
 
 class Dashboard extends StatelessWidget {
   const Dashboard({super.key});
@@ -106,6 +107,7 @@ class Dashboard extends StatelessWidget {
               Icons.shopping_cart,
               Colors.green,
               () {
+                
                 // Navegar a compras
               },
             ),
@@ -117,6 +119,12 @@ class Dashboard extends StatelessWidget {
               Icons.bar_chart,
               Colors.purple,
               () {
+                 Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const VentasScreen(), // ← AQUÍ ESTABA EL PROBLEMA
+      ),
+    );
                 // Navegar a ventas
               },
             ),
