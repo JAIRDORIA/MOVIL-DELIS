@@ -1,3 +1,4 @@
 class Ruta {
-  static String baseurl = "https://snackflow-api.onrender.com";
+  // URL base del backend en producción (Render)
+  static String baseUrl = "https://snackflow-api.onrender.com";
 }

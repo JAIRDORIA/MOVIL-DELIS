@@ -17,7 +17,7 @@ class ApiService {
   }
 
   static Future<dynamic> get(String endpoint) async {
-    final base = 'http://10.2.131.30:4000';
+    final base = 'https://snackflow-api.onrender.com';
     final headers = await _headers();
     final res = await http.get(Uri.parse('$base$endpoint'), headers: headers);
     if (res.statusCode >= 200 && res.statusCode < 300) {
@@ -27,7 +27,7 @@ class ApiService {
   }
 
   static Future<dynamic> post(String endpoint, Map<String, dynamic> body) async {
-    final base = 'http://10.2.131.30:4000';
+    final base = 'https://snackflow-api.onrender.com';
     final headers = await _headers();
     final res = await http.post(
       Uri.parse('$base$endpoint'),
@@ -41,7 +41,7 @@ class ApiService {
   }
 
   static Future<dynamic> put(String endpoint, Map<String, dynamic> body) async {
-    final base = 'http://10.2.131.30:4000';
+    final base = 'https://snackflow-api.onrender.com';
     final headers = await _headers();
     final res = await http.put(
       Uri.parse('$base$endpoint'),

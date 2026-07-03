@@ -23,27 +23,26 @@ class Cliente {
 
   factory Cliente.fromJson(Map<String, dynamic> json) {
     return Cliente(
-      id: json['id'] is int ? json['id'] : int.parse(json['id'].toString()),
-      nombre: json['nombre'] ?? '',
-      identificacion: json['identificacion']?.toString() ?? '',
-      telefono: json['telefono'] ?? '',
-      direccion: json['direccion'] ?? '',
-      email: json['email'] ?? '',
-      activo: json['activo'] == true || json['activo'] == 1,
-      createdat: DateTime.tryParse(json['created_at']?.toString() ?? '') ?? DateTime.now(),
-      updatedat: DateTime.tryParse(json['updated_at']?.toString() ?? '') ?? DateTime.now(),
+      id: json['ID_Cliente'],
+      nombre: json['Cli_Nombre'] ?? '',
+      identificacion: json['Cli_identificacion'] ?? '',
+      telefono: json['Cli_Telefono'] ?? '',
+      direccion: json['Cli_Direccion'] ?? '',
+      email: json['Cli_email'] ?? '',
+      activo: json['Cli_Activo'] == 1,
+      createdat: DateTime.parse(json['Cli_Creado']),
+      updatedat: DateTime.parse(json['Cli_Actualizado']),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
-      'nombre': nombre,
-      'identificacion': identificacion,
-      'telefono': telefono,
-      'direccion': direccion,
-      'email': email,
-      'activo': activo,
+      'Cli_Nombre': nombre,
+      'Cli_identificacion': identificacion,
+      'Cli_Telefono': telefono,
+      'Cli_Direccion': direccion,
+      'Cli_email': email,
+      'Cli_Activo': activo ? 1 : 0,
     };
   }
 }

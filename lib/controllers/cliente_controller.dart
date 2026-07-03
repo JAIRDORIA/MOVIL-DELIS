@@ -12,7 +12,7 @@ import '../data/model/clientes.dart';
 ///   PUT    /clientes/<id>    -> actualizar cliente
 ///   DELETE /clientes/<id>    -> eliminar (borrado lógico)
 class ClienteController {
-  final String _baseUrl = Ruta.baseurl;
+  final String _baseUrl = Ruta.baseUrl;
 
   /// Obtiene el listado de clientes. El backend pagina la respuesta
   /// (recibe page/per_page), así que pedimos un per_page alto para traer

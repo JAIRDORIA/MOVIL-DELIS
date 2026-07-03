@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:movil_delis/controllers/dashboard_controller.dart';
 import 'package:movil_delis/screens/clientes/listado_clientes_screen.dart';
+import 'package:movil_delis/presentation/screens/listado_ventas.dart';
 
 class Dashboard extends StatefulWidget {
   const Dashboard({super.key});
@@ -139,7 +140,7 @@ class _DashboardState extends State<Dashboard> {
               Icons.shopping_cart,
               Colors.green,
               () {
-              
+                // Navegar a compras
               },
             ),
 
@@ -150,7 +151,13 @@ class _DashboardState extends State<Dashboard> {
               Icons.bar_chart,
               Colors.purple,
               () {
-                // TODO: Navegar a Ventas
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const VentasScreen(),
+                  ),
+                );
+                // Navegar a ventas
               },
             ),
           ],
